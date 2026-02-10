@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mental Wellness Support Bot</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="chatbox">
+    <div class="header">Mental Wellness Support Bot</div>
+    <p class="subtitle">A safe space to express and reflect</p>
+
+    <div id="chat"></div>
+
+    <div id="typing" class="typing">Bot is typing…</div>
+
+    <form id="chat-form">
+        <input type="text" id="user-input" placeholder="Type your thoughts here..." required>
+        <button type="submit">Send</button>
+    </form>
+
+    <p class="disclaimer">
+        This chatbot is not a replacement for professional mental health support.
+    </p>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+const typing = document.getElementById("typing");
+const form = document.getElementById("chat-form");
+const input = document.getElementById("user-input");
+
+function addMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.classList.add("message", sender);
+
+    const time = document.createElement("span");
+    time.classList.add("time");
+    time.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    msg.innerText = text;
+    msg.appendChild(time);
+
+    chat.appendChild(msg);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+window.onload = () => {
+    addMessage("Hello, I'm here to listen. How are you feeling right now?", "bot");
+};
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const message = input.value.trim();
+    if (!message) return;
+
+    addMessage(message, "user");
+    input.value = "";
+    typing.style.display = "block";
+
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+    typing.style.display = "none";
+    addMessage(data.reply, "bot");
+});
+</script>
+
+</body>
+</html>
